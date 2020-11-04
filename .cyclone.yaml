@@ -1,0 +1,151 @@
+apiVersion: cyclone.dev/v1alpha1
+kind: Workflow
+metadata:
+  name: pofei-test-pipeline-20201015090343
+spec:
+  Resources:
+    limits:
+      cpu: "1"
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+  globalVariables:
+  - name: IMAGE_TAG
+    value: $(random:5)
+  notification:
+    policy: ""
+    receivers: null
+  stages:
+  - artifacts: null
+    depends: []
+    name: pofei-test-pipeline-20201015090343-gou-jian-dai-ma-0-0
+    trivial: false
+  - artifacts: null
+    depends:
+    - pofei-test-pipeline-20201015090343-gou-jian-dai-ma-0-0
+    name: pofei-test-pipeline-20201015090343-jing-xiang-gou-jian-1-0
+    trivial: false
+
+---
+
+apiVersion: cyclone.dev/v1alpha1
+kind: Stage
+metadata:
+  name: pofei-test-pipeline-20201015090343-gou-jian-dai-ma-0-0
+spec:
+  pod:
+    inputs:
+      resources:
+      - name: devops-code-pofei-test
+        path: /tmp/code
+        type: ""
+    outputs: {}
+    spec:
+      containers:
+      - args:
+        - sleep 3600
+        command:
+        - /bin/sh
+        - -e
+        - -c
+        image: cargo30.dev.caicloud.xyz/library/node:9-alpine
+        name: main
+        resources: {}
+        workingDir: /tmp/code
+
+---
+
+apiVersion: cyclone.dev/v1alpha1
+kind: Stage
+metadata:
+  name: pofei-test-pipeline-20201015090343-jing-xiang-gou-jian-1-0
+spec:
+  pod:
+    inputs:
+      arguments:
+      - name: registry
+        value: null
+      - name: repository
+        value: null
+      - name: tag
+        value: null
+      - name: build-context
+        value: .
+      - name: dockerfile-path
+        value: ""
+      - name: image-name
+        value: release-notes
+      - name: dockerfile-template
+        value: go.dockerfile
+      - name: custom-dockerfile
+        value: RlJPTSBjYXJnbzMwLmRldi5jYWljbG91ZC54eXovbGlicmFyeS9ub2RlOjktYWxwaW5lCgpXT1JLRElSIC9hcHAKCiMgY2hhbmdlIHBhdGggdG8geW91ciByZXBvIGRpcgpDT1BZIC4gL2FwcAoKIyBjaGFuZ2UgYXBwIHRvIHlvdXIgYXBwIG5hbWUKQ01EIFsibnBtIHN0YXJ0Il0=
+      resources:
+      - name: devops-code-pofei-test
+        path: /tmp/code
+        type: ""
+    outputs:
+      resources:
+      - name: devops-image-pofei-test-1
+        path: ""
+        type: Image
+    spec:
+      containers:
+      - args:
+        - /bin/sh
+        - -e
+        - -c
+        - while [ ! -S /var/run/docker.sock ];do sleep 1;done;if [[ "${DOCKERFILE_PATH:-}"
+          == "" ]];then echo -e "$DOCKERFILE" | base64 -d > /tmp/Dockerfile;else cp
+          "$DOCKERFILE_PATH" /tmp/Dockerfile;fi;docker build -f /tmp/Dockerfile -t
+          {{ registry }}/{{ repository }}:{{ tag }} {{ build-context }}
+        env:
+        - name: DOCKERFILE
+          value: '{{{ custom-dockerfile }}}'
+        - name: DOCKERFILE_PATH
+          value: '{{ dockerfile-path }}'
+        image: cargo30.dev.caicloud.xyz/release/docker:18.03.1-ce-dind-certs.2
+        name: main
+        resources: {}
+        workingDir: /tmp/code
+
+--- 
+
+apiVersion: cyclone.dev/v1alpha1
+kind: Resource
+metadata:
+  name: devops-code-pofei-test
+spec:
+  operations: null
+  parameters:
+  - name: SCM_URL
+    value: null
+  - name: SCM_REVISION
+    value: refs/heads/master
+  - name: SCM_AUTH
+    value: null
+  persistent: null
+  type: Git
+
+--- 
+
+apiVersion: cyclone.dev/v1alpha1
+kind: Resource
+metadata:
+  name: devops-image-pofei-test-1
+spec:
+  operations: null
+  parameters:
+  - name: REGISTRY
+    value: null
+  - name: REPOSITORY
+    value: null
+  - name: TAG
+    value: null
+  - name: USER
+    value: null
+  - name: PASSWORD
+    value: null
+  persistent: null
+  type: Image
+
