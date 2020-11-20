@@ -1,15 +1,8 @@
 apiVersion: cyclone.dev/v1alpha1
 kind: Workflow
 metadata:
-  name: pofei-test-pipeline-20201015090343
+  name: {{ workflowrun }}-workflow
 spec:
-  Resources:
-    limits:
-      cpu: "1"
-      memory: 2Gi
-    requests:
-      cpu: 500m
-      memory: 1Gi
   globalVariables:
   - name: IMAGE_TAG
     value: $(random:5)
@@ -19,12 +12,12 @@ spec:
   stages:
   - artifacts: null
     depends: []
-    name: pofei-test-pipeline-20201015090343-gou-jian-dai-ma-0-0
+    name: stage1
     trivial: false
   - artifacts: null
     depends:
-    - pofei-test-pipeline-20201015090343-gou-jian-dai-ma-0-0
-    name: pofei-test-pipeline-20201015090343-jing-xiang-gou-jian-1-0
+    - stage1
+    name: stage2
     trivial: false
 
 ---
@@ -32,12 +25,12 @@ spec:
 apiVersion: cyclone.dev/v1alpha1
 kind: Stage
 metadata:
-  name: pofei-test-pipeline-20201015090343-gou-jian-dai-ma-0-0
+  name: {{ workflowrun }}-stage1
 spec:
   pod:
     inputs:
       resources:
-      - name: devops-code-pofei-test
+      - name: {{ workflowrun }}-resource1
         path: /tmp/code
         type: ""
     outputs: {}
@@ -59,7 +52,7 @@ spec:
 apiVersion: cyclone.dev/v1alpha1
 kind: Stage
 metadata:
-  name: pofei-test-pipeline-20201015090343-jing-xiang-gou-jian-1-0
+  name: {{ workflowrun }}-stage2
 spec:
   pod:
     inputs:
@@ -81,12 +74,12 @@ spec:
       - name: custom-dockerfile
         value: RlJPTSBjYXJnbzMwLmRldi5jYWljbG91ZC54eXovbGlicmFyeS9ub2RlOjktYWxwaW5lCgpXT1JLRElSIC9hcHAKCiMgY2hhbmdlIHBhdGggdG8geW91ciByZXBvIGRpcgpDT1BZIC4gL2FwcAoKIyBjaGFuZ2UgYXBwIHRvIHlvdXIgYXBwIG5hbWUKQ01EIFsibnBtIHN0YXJ0Il0=
       resources:
-      - name: devops-code-pofei-test
+      - name: {{ workflowrun }}-resource1
         path: /tmp/code
         type: ""
     outputs:
       resources:
-      - name: devops-image-pofei-test-1
+      - name: {{ workflowrun }}-resource2
         path: ""
         type: Image
     spec:
@@ -114,7 +107,7 @@ spec:
 apiVersion: cyclone.dev/v1alpha1
 kind: Resource
 metadata:
-  name: devops-code-pofei-test
+  name: {{ workflowrun }}-resource1
 spec:
   operations: null
   parameters:
@@ -132,7 +125,7 @@ spec:
 apiVersion: cyclone.dev/v1alpha1
 kind: Resource
 metadata:
-  name: devops-image-pofei-test-1
+  name: {{ workflowrun }}-resource2
 spec:
   operations: null
   parameters:
